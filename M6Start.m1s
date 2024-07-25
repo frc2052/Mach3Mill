@@ -1,0 +1,68 @@
+     
+  tool = GetSelectedTool()
+  SetCurrentTool( tool )
+  
+  Code("G90 G20 G80 G49 G40")'safe code
+  DoSpinStop()'stop spindle
+  DoOEMButton(225)'flood coolant off
+  DoOEMButton(227)'mist coolant off
+
+  Code("M9")'stop coolant   
+  
+  Code("G53 G90 G00 Z0.")'goto machine z 0
+  
+  While IsMoving()
+	Sleep(10)
+  Wend
+  
+  Code("G53 G90 G00 X21.938 Y-30.214")'go to tool change position
+  
+  While IsMoving()
+	Sleep(10)
+  Wend
+  
+  MachMsg("CHANGE TO TOOL "& tool,"M6 Tool Change",0)
+  MachMsg("PUT CLIP ON TOOL " & tool,"M6 Tool Change",0)
+  
+  Code("G31 Z-6. f20")'fast feed tool down
+  
+  While IsMoving()
+	Sleep(10)
+  Wend
+  
+  Code("G91 G00 Z.25")'retract tool
+  
+  While IsMoving()
+	Sleep(10)
+  Wend
+  
+  Code("G31 Z-6.25 F1")'probe at slow feedrate
+  
+  While IsMoving()
+	Sleep(10)
+  Wend
+  
+  SetToolParam(GetCurrentTool(),2,GetABSPosition(2)*25.4)
+  
+  Code("G04 P1")'short dwell on probe
+  
+  While IsMoving()
+	Sleep(10)
+  Wend
+  
+  Code("G91 G00 Z.25")'retract probe
+  
+  While IsMoving()
+	Sleep(10)
+  Wend
+  
+  Code("G53 G90 G00 Z0.")'goto machine z 0
+
+  Code("G90")'back to absolute mode
+  
+  While IsMoving()
+	Sleep(10)
+  Wend
+  Code("G43.H"&tool)    
+  MachMsg("REMOVE CLIP FROM TOOL "& tool,"M6 Tool Change",0)   
+                 
